@@ -6,9 +6,11 @@
     "minimum-stability": "dev",
     "prefer-stable": true,
     "require": {
-        "php": ">=7.2.5",
+        "php": "^8.0",
         "ext-ctype": "*",
         "ext-iconv": "*",
+        "ext-json": "*",
+        "ext-pdo": "*",
         "ext-zend-opcache": "*",
         "adrenalinkin/doctrine-naming-strategy": "^1.1",
         "composer/package-versions-deprecated": "1.11.99.1",

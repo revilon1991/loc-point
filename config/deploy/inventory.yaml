@@ -1,0 +1,11 @@
+webservers:
+    hosts:
+        prod:
+            ansible_ssh_host:       'ovz3.revilon.pl50n.vps.myjino.ru'
+            ansible_ssh_port:       '49269'
+            ansible_user:           'admin'
+            deploy_to:              '/home/admin/web/loc-point.9ek.ru'
+
+    vars:
+        git_repo:           'https://github.com/revilon1991/loc-point.git'
+        project_name:       loc-point
