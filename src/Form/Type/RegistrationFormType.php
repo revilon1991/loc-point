@@ -49,6 +49,7 @@ class RegistrationFormType extends AbstractType
             ->add('locale', LocaleType::class, [
                 'label' => false,
                 'data' => 'ru',
+                'help' => 'Prefer language'
             ])
             ->add('agreeTerms', CheckboxType::class, [
                 'label' => 'Agree <a href="#" data-toggle="modal" data-target="#privacyPolicyModal">terms</a>',

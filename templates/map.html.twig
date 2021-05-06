@@ -85,6 +85,7 @@
                     url: "{{ path('app_map_getpointlist') }}"
                 }).done(function(data) {
                     objectManager.add(data);
+                    $('.map-loader').fadeOut();
                 });
             }
         });
@@ -101,5 +102,9 @@
 {% endblock %}
 
 {% block content %}
-    <div id="map"></div>
+    <div class="map-loader spinner-border" role="status" style="position: absolute; margin: 25% 50% 0 50%;">
+        <span class="sr-only">Loading...</span>
+    </div>
+    <div id="map">
+    </div>
 {% endblock %}

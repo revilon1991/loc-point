@@ -7,8 +7,11 @@ namespace App\Controller;
 use App\Entity\Location;
 use App\Entity\User;
 use App\Form\Type\PointFormType;
+use Doctrine\DBAL\Driver\Exception as DBALDriverException;
+use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\ORM\EntityManagerInterface;
 use GuzzleHttp\ClientInterface;
+use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\RequestOptions;
 use JsonException;
 use Psr\Log\LoggerInterface;
@@ -20,6 +23,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Throwable;
 
+use function array_merge;
 use function json_decode;
 use function sprintf;
 
@@ -41,6 +45,10 @@ class MapController extends AbstractController
         return $this->redirectToRoute('app_map_map');
     }
 
+    /**
+     * @throws DBALDriverException
+     * @throws DBALException
+     */
     #[Route('/map', methods: ['GET'])]
     public function map(): Response
     {
@@ -50,11 +58,18 @@ class MapController extends AbstractController
 
         /** @var User $user */
         $user = $this->getUser();
+        $visiting = [
+            'county' => 0,
+            'city' => 0,
+            'village' => 0,
+            'ground' => 0,
+        ];
 
         if ($user) {
             $sql = '
             select :county_key, count(distinct countryCode)
             from Location l
+            where userId = :user_id
             union
             select type, count(*)
             from Location l
@@ -67,14 +82,9 @@ class MapController extends AbstractController
                 'user_id' => $user->getId(),
             ]);
 
-            $visiting = $stmt->fetchAllKeyValue();
-        } else {
-            $visiting = [
-                'county' => 0,
-                'city' => 0,
-                'village' => 0,
-                'ground' => 0,
-            ];
+            $userVisiting = $stmt->fetchAllKeyValue();
+
+            $visiting = array_merge($visiting, $userVisiting);
         }
 
         return $this->render('map.html.twig', [
@@ -85,6 +95,7 @@ class MapController extends AbstractController
 
     /**
      * @throws JsonException
+     * @throws GuzzleException
      */
     #[Route('/point', methods: ['POST'])]
     public function addPoint(Request $request): Response
@@ -146,9 +157,6 @@ class MapController extends AbstractController
         return $this->redirectToRoute('app_map_index');
     }
 
-    /**
-     * @throws JsonException
-     */
     #[Route('/pointList', methods: ['GET'])]
     public function getPointList(): Response
     {
