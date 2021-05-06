@@ -51,6 +51,7 @@
         "twig/twig": "^2.12|^3.0"
     },
     "require-dev": {
+        "jetbrains/phpstorm-stubs": "dev-master",
         "phpunit/phpunit": "^9.5",
         "roave/security-advisories": "dev-latest",
         "squizlabs/php_codesniffer": "*",

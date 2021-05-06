@@ -106,6 +106,9 @@
     "guzzlehttp/psr7": {
         "version": "1.8.2"
     },
+    "jetbrains/phpstorm-stubs": {
+        "version": "dev-master"
+    },
     "laminas/laminas-code": {
         "version": "4.2.1"
     },

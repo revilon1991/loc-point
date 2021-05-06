@@ -51,7 +51,8 @@ class MapController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
 
-        $sql = '
+        if ($user) {
+            $sql = '
             select :county_key, count(distinct countryCode)
             from Location l
             union
@@ -61,12 +62,20 @@ class MapController extends AbstractController
             group by type
         ';
 
-        $stmt = $this->entityManager->getConnection()->executeQuery($sql, [
-            'county_key' => 'county',
-            'user_id' => $user->getId(),
-        ]);
+            $stmt = $this->entityManager->getConnection()->executeQuery($sql, [
+                'county_key' => 'county',
+                'user_id' => $user->getId(),
+            ]);
 
-        $visiting = $stmt->fetchAllKeyValue();
+            $visiting = $stmt->fetchAllKeyValue();
+        } else {
+            $visiting = [
+                'county' => 0,
+                'city' => 0,
+                'village' => 0,
+                'ground' => 0,
+            ];
+        }
 
         return $this->render('map.html.twig', [
             'form' => $form->createView(),
