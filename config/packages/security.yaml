@@ -1,0 +1,47 @@
+security:
+    enable_authenticator_manager: true
+    providers:
+        user:
+            entity:
+                class: App\Entity\User
+                property: email
+
+    encoders:
+        App\Entity\User:
+            algorithm: bcrypt
+            cost: 12
+
+    firewalls:
+        dev:
+            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            security: false
+        user:
+            pattern: ^/
+            provider: user
+            remember_me:
+                secret: '%kernel.secret%'
+                lifetime: 2592000 # 30 days
+                path: /
+                remember_me_parameter: login_form[_remember_me]
+            form_login:
+                login_path: app_security_login
+                check_path: app_security_logincheck
+                default_target_path: app_map_map
+                always_use_default_target_path: true
+                username_parameter: login_form[username]
+                password_parameter: login_form[password]
+                csrf_parameter: login_form[_token]
+            login_link:
+                check_route: app_security_logincheck
+                signature_properties: ['id', 'email']
+            logout:
+                path: app_security_logout
+                target: app_security_login
+
+    access_control:
+        - { path: ^/login, roles: !php/const Symfony\Component\Security\Core\Authorization\Voter\AuthenticatedVoter::PUBLIC_ACCESS }
+        - { path: ^/register, roles: !php/const Symfony\Component\Security\Core\Authorization\Voter\AuthenticatedVoter::PUBLIC_ACCESS }
+        - { path: ^/map, roles: !php/const Symfony\Component\Security\Core\Authorization\Voter\AuthenticatedVoter::PUBLIC_ACCESS }
+        - { path: ^/geo, roles: !php/const Symfony\Component\Security\Core\Authorization\Voter\AuthenticatedVoter::PUBLIC_ACCESS }
+        - { path: ^/.+, roles: [ROLE_USER] }
+        - { path: ^/, roles: !php/const Symfony\Component\Security\Core\Authorization\Voter\AuthenticatedVoter::PUBLIC_ACCESS }

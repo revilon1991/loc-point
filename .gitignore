@@ -1,0 +1,34 @@
+###> symfony/framework-bundle ###
+/.env.local
+/.env.local.php
+/.env.*.local
+/config/secrets/prod/prod.decrypt.private.php
+/public/bundles/
+/vendor/
+/var/*
+!/var/log
+/var/log/*
+!/var/log/.gitkeep
+!/var/cache
+/var/cache/*
+!/var/cache/.gitkeep
+###< symfony/framework-bundle ###
+
+###> symfony/phpunit-bridge ###
+.phpunit
+.phpunit.result.cache
+/phpunit.xml
+###< symfony/phpunit-bridge ###
+
+/.idea/*
+!.idea/codeStyles/codeStyleConfig.xml
+!.idea/inspectionProfiles/Project_Default.xml
+!.idea/php.xml
+!.idea/sqldialects.xml
+!.idea/symfony2.xml
+!.idea/vcs.xml
+
+###> phpunit/phpunit ###
+/phpunit.xml
+.phpunit.result.cache
+###< phpunit/phpunit ###

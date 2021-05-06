@@ -1,0 +1,105 @@
+{% extends '/base.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+
+    <style>
+        html, body {
+            height: 100%;
+        }
+        #map {
+            width: 100%;
+            height: 100%;
+            min-height: 100%;
+            display: block;
+        }
+    </style>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+
+    <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU&amp;apikey={{ app.request.server.get('YANDEX_MAP_API_KEY') }}" type="text/javascript"></script>
+    <script type="text/javascript">
+        ymaps.ready(function () {
+            var map;
+            ymaps.geolocation.get().then(function (res) {
+                var mapContainer = $('#map'),
+                    bounds = res.geoObjects.get(0).properties.get('boundedBy'),
+                    mapState = ymaps.util.bounds.getCenterAndZoom(
+                        bounds,
+                        [mapContainer.width(), mapContainer.height()]
+                    );
+                createMap(mapState);
+            }, function () {
+                $.ajax({
+                    url: "{{ path('app_map_coordinatesbyip') }}"
+                }).done(function(data) {
+                    createMap(data);
+                })
+            });
+
+            function createMap (state) {
+                map = new ymaps.Map('map', state, {
+                    searchControlProvider: 'yandex#search'
+                });
+                var objectManager = new ymaps.ObjectManager({
+                    clusterize: true,
+                    gridSize: 32,
+                    clusterDisableClickZoom: true,
+                });
+                objectManager.objects.options.set('preset', 'islands#greenDotIcon');
+                objectManager.clusters.options.set('preset', 'islands#greenClusterIcons');
+                map.geoObjects.add(objectManager);
+                map.controls.remove('trafficControl')
+                map.behaviors.enable('scrollZoom');
+
+                map.events.add('click', function (e) {
+                    if (!map.balloon.isOpen()) {
+                        var coords = e.get('coords');
+                        map.balloon.open(coords, {
+                            contentHeader: '{{ form_start(form) }}',
+                            contentBody:
+                                '{{ form_row(form.name) }}' +
+                                '{{ form_row(form.type) }}' +
+                                '{{ form_row(form.description) }}' +
+                                '{{ form_row(form.eventDateFrom) }}' +
+                                '{{ form_row(form.eventDateTo) }}' +
+                                '{{ form_row(form.latitude) }}' +
+                                '{{ form_row(form.longitude) }}' +
+                                '{{ form_row(form.save) }}',
+                            contentFooter: '{{ form_end(form) }}'
+                        });
+
+                    } else {
+                        map.balloon.close();
+                    }
+                });
+                map.events.add('balloonopen', function () {
+                    document.querySelector('#point_form_latitude').value = map.balloon._balloon._position[0].toPrecision(20);
+                    document.querySelector('#point_form_longitude').value = map.balloon._balloon._position[1].toPrecision(20);
+                    map.hint.close();
+                });
+
+                $.ajax({
+                    url: "{{ path('app_map_getpointlist') }}"
+                }).done(function(data) {
+                    objectManager.add(data);
+                });
+            }
+        });
+    </script>
+{% endblock %}
+
+{% block header_right %}
+    <span class="badge badge-primary">Country <span class="badge badge-pill badge-light">{{ visiting.county }}</span></span>
+    <span class="badge badge-success">City <span class="badge badge-pill badge-light">{{ visiting.city }}</span></span>
+    <span class="badge badge-info">Village <span class="badge badge-pill badge-light">{{ visiting.village }}</span></span>
+    <span class="badge badge-dark">Ground <span class="badge badge-pill badge-light">{{ visiting.ground }}</span></span>
+
+    {{ parent() }}
+{% endblock %}
+
+{% block content %}
+    <div id="map"></div>
+{% endblock %}

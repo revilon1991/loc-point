@@ -1,0 +1,48 @@
+server {
+    listen 80;
+    server_name ${DOMAIN};
+
+    root /app/public;
+
+    error_log /var/log/nginx/${PROJECT_NAME}.error.log;
+    access_log /var/log/nginx/${PROJECT_NAME}.access.log;
+
+    location / {
+        try_files $uri /index.php$is_args$args;
+    }
+
+    location ~ ^/index\.php(/|$) {
+        fastcgi_pass php:9000;
+        fastcgi_split_path_info ^(.+\.php)(/.*)$;
+
+        include fastcgi_params;
+
+        fastcgi_param X-Real-IP $remote_addr;
+        fastcgi_param X-Forwarded-For $proxy_add_x_forwarded_for;
+        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+        fastcgi_param DOCUMENT_ROOT $realpath_root;
+        fastcgi_param HTTPS off;
+
+        add_header Access-Control-Allow-Origin "*" always;
+        add_header Access-Control-Allow-Methods "*" always;
+        add_header Access-Control-Allow-Headers "Authorization, NoSign, Content-Type" always;
+
+        if ($request_method = OPTIONS) {
+            add_header Access-Control-Allow-Origin "*" always;
+            add_header Access-Control-Allow-Methods "OPTIONS, GET, HEAD, POST, PUT, DELETE" always;
+            add_header Access-Control-Allow-Headers "Authorization, NoSign, Content-Type, SignatureDisable" always;
+            add_header Access-Control-Allow-Credentials "true" always;
+            add_header Content-Length 0 always;
+            add_header Content-Type text/plain always;
+
+            return 200;
+        }
+    }
+
+    location ~ \.php$ {
+        return 404;
+    }
+}
+
+
+
